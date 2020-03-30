@@ -32,7 +32,7 @@ hop = Nval; % How many samples to skip when moving to the next fold.
 
 for kfold = 1:K
    
-    valind = randomind(((kfold-1)*hop)+1:kfold*hop); % Select validation indices
+    valind = randomind(location+1:location+hop); % Select validation indices
     estind = setdiff(randomind, valind); % Select estimation indices
     assert(isempty(intersect(valind,estind)), "There are overlapping indices in valind and estind!"); % assert empty intersection between valind and estind
     wold = zeros(M,1); % Initialize estimate for warm-starting.
