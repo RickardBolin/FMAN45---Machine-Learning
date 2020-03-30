@@ -60,5 +60,23 @@ plot(ninterp, Xinterp*wopt)
 
 legend({'Original data','Best prediction', 'Interpolation'}, 'FontSize', 16)
 
+%%
+lambda_max = 0.1; % max(abs(Xaudio'*Ttrain));
+lambda_min = 0.005;
+N_lambda = 15;
+lambdavec = exp(linspace(log(lambda_min), log(lambda_max), N_lambda));
+[wopt,lambdaopt,RMSEval,RMSEest] = multiframe_lasso_cv(Ttrain, Xaudio, lambdavec, 3);
 
+title('RMSE for different lambdas', 'FontSize', 25)
+xlabel('Lambda', 'FontSize', 18) 
+ylabel('Error', 'FontSize', 18)
+hold on
+
+plot(lambdavec, RMSEval, 'x');
+plot(lambdavec, RMSEest, 'o');
+plot([lambdaopt lambdaopt], [0, 1], '--');
+legend({'RMSE for validation','RMSE for estimation', 'Optimal lambda'}, 'FontSize', 16)
+
+%%
+Y_clean = lasso_denoise(Ttrain,Xaudio, lambdaopt);
 
