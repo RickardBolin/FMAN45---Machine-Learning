@@ -52,14 +52,16 @@ for kiter = 1:Niter
     % sweep over coordinates, in randomized order defined by kInd_random
     for ksweep = 1:length(kindvec_random)
         kind = kindvec_random(ksweep); % Pick out current coordinate to modify.
-        
-        x = NaN % ... select current regression vector
-        r = NaN% ... put impact of old w(kind) back into the residual.
-        w(kind) = NaN;% ... update the lasso estimate at coordinate kind
-        r = NaN;% ... remove impact of newly estimated w(kind) from residual.
+        x = X(:,kind); % ... select current regression vector
+        r = r - x*w;% ... put impact of old w(kind) back into the residual.
+        w(kind) = (sign(x'*r)/(x'*x))*max(0, abs(x'*r) - lambda);% ... update the lasso estimate at coordinate kind
+      
+        r = r + X(kind)*w(kind);% ... remove impact of newly estimated w(kind) from residual.
         
         wsup(kind) = double(abs(w(kind))>zero_tol); % update whether w(kind) is zero or not.
-   
+        
+        error = 0.5*norm(t-X*w)^2 + lambda*norm(w,1)
+        
     end
 end
 
