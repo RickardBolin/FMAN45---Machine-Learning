@@ -39,9 +39,8 @@ for kfold = 1:K
     
     for klam = 1:Nlam
         what = lasso_ccd(t(estind), X(estind, :), lambdavec(klam), wold); % Calculate LASSO estimate on estimation indices for the current lambda-value.
-        
         SEval(kfold,klam) = (1/Nval)*norm(t(valind)- X(valind, :)*what)^2; % Calculate validation error for this estimate
-        SEest(kfold,klam) = (1/Nval)*norm(t(estind)- X(estind, :)*what)^2; % Calculate estimation error for this estimate
+        SEest(kfold,klam) = (1/(N-Nval))*norm(t(estind)- X(estind, :)*what)^2; % Calculate estimation error for this estimate
         
         wold = what; % Set current estimate as old estimate for next lambda-value.
         disp(['Fold: ' num2str(kfold) ', lambda-index: ' num2str(klam)]) % Display current fold and lambda-index.

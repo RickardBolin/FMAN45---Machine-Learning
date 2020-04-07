@@ -40,14 +40,5 @@ while loc + N <= NN
     disp([num2str(floor(loc/NN*100)) ' %']) % show progress
 end
 disp('100 %')
-
-
-
-
-
-
-
-
-
 end
 

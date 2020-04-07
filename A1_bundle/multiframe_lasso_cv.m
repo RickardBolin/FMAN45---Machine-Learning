@@ -47,10 +47,9 @@ for kframe = 1:Nframes % First loop over frames
     
     for kfold = 1:K % Then loop over the folds
         
-        valind = randomind(((kfold-1)*cvhop)+1:kfold*cvhop); % Select validation indices
+        valind = randomind(cvlocation+1:cvlocation+cvhop); % Select validation indices
         estind = setdiff(randomind, valind); % Select estimation indices
         assert(isempty(intersect(valind,estind)), "There are overlapping indices in valind and estind!"); % assert empty intersection between valind and estind
-    
         
         t = T(framelocation + idx); % Set data in this frame
         wold = zeros(M,1);  % Initialize old weights for warm-starting.
@@ -58,19 +57,19 @@ for kframe = 1:Nframes % First loop over frames
         for klam = 1:Nlam  % Finally loop over the lambda grid
             
             what = lasso_ccd(t(estind), X(estind, :), lambdavec(klam), wold); % Calculate LASSO estimate at current frame, fold, and lambda
-            
-            SEval(kfold,klam) = SEval(kfold, klam) + (1/Nval)*norm(t(valind) - X(valind, :)*what)^2; % Calculate validation error for this estimate
-            SEest(kfold,klam) = SEest(kfold,klam) + (1/Nval)*norm(t(estind) - X(estind, :)*what)^2; % Add estimation error at current frame, fold and lambda to the estimation error for this fold and lambda, summing tthe error over the frames
+             
+            SEval(kfold,klam) = SEval(kfold,klam) + (1/(Nval))*norm(t(valind) - X(valind, :)*what)^2; % Calculate validation error for this estimate
+            SEest(kfold,klam) = SEest(kfold,klam) + (1/(N-Nval))*norm(t(estind) - X(estind, :)*what)^2; % Add estimation error at current frame, fold and lambda to the estimation error for this fold and lambda, summing tthe error over the frames
             
             wold = what; % Set current LASSO estimate as estimate for warm-starting.
-            disp(['Frame: ' num2str(kframe) ', Fold: ' num2str(kfold) ', Hyperparam: ' num2str(klam)]) % Display progress through frames, folds and lambda-indices.
+            %disp(['Frame: ' num2str(kframe) ', Fold: ' num2str(kfold) ', Hyperparam: ' num2str(klam)]) % Display progress through frames, folds and lambda-indices.
         end
         
         cvlocation = cvlocation+cvhop; % Hop to location for next fold.   
         
     end
     framelocation = framelocation + framehop; % Hop to location for next frame.
-    
+    disp(['Frame: ' num2str(kframe)])
 end
 
 
