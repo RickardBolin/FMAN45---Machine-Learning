@@ -1,0 +1,8 @@
+function [labels] = K_means_classification(target,y,K)
+   labels = zeros(K,1);
+   for cluster = 1:K
+       [amount, class] = groupcounts(target(y == cluster));
+       [~, idxOfClass] = max(amount);
+       labels(idxOf)
+   end   
+end

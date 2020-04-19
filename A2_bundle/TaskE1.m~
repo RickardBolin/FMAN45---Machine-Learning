@@ -1,0 +1,17 @@
+clear
+close all
+load A2_data.mat
+
+norm_mean = mean2(train_data_01);
+norm_std = std2(train_data_01);
+
+norm_data = (train_data_01 - norm_mean)/norm_std;
+
+[U, S, V] = svd(norm_data);
+%%
+proj = U(:,1:2)'*norm_data;
+%%
+figure
+scatter(proj(1,:), proj(2,:))
+hold on
+scatter(proj(1,:), proj(2,:))
