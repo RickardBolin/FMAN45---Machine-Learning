@@ -45,21 +45,21 @@ nbr_apples = 1;
 % ----- YOU MAY CHANGE SETTINGS BELOW UNLESS OTHERWISE NOTIFIED! ----------
 
 % Specify whether to test the agent or not (false --> train agent)
-test_agent = false; % set to true when you want to test your agent.
+test_agent = true; % set to true when you want to test your agent.
 
 % Updates per second (when watching the agent play).
 updates_per_sec = 5; 
 
 % Set visualization settings (what you as programmer will see when the agent is playing)
 % Hint: Set to 0 once you want to train for many episodes.
-show_fraction = 0.0; % 1: show everything, 0: show nothing, 0.1: show every tenth, and so on
+show_fraction = 0; % 1: show everything, 0: show nothing, 0.1: show every tenth, and so on
 
 % Stuff related to learning agent (YOU SHOULD EXPERIMENT A LOT WITH THESE
 % SETTINGS - SEE EXERCISE 7).
-rewards = struct('default', 0, 'apple', 50, 'death', -50); % Reward signal
-gamm    = 0.7;  % Discount factor in Q-learning
-alph    = 0.05; % Learning rate in Q-learning (automatically set to zero during testing)
-eps     = 0.05; % Random action selection probability in epsilon-greedy Q-learning (automatically set to zero during testing)
+rewards = struct('default', 0, 'apple', 1, 'death', -1); % Reward signal
+gamm    = 0.9;  % Discount factor in Q-learning
+alph    = 0.01; % Learning rate in Q-learning (automatically set to zero during testing)
+eps     = 0.01; % Random action selection probability in epsilon-greedy Q-learning (automatically set to zero during testing)
 
 % Optionally play around also with these settings.
 alph_update_iter   = 0;   % 0: Never update alpha, Positive integer k: Update alpha every kth episode
@@ -114,7 +114,7 @@ all_scores = nan(1, nbr_ep);
 for i = 1 : nbr_ep
     
     % Display what episode we're at and current weights.
-    if ~test_agent
+    if ~test_agent && mod(i, 1000) == 0
         disp(['EPISODE: ', num2str(i), ' / ', num2str(nbr_ep)]);
     end
     
@@ -214,10 +214,10 @@ for i = 1 : nbr_ep
             % we set future Q-values at terminal states equal to zero].
             % Hint: Q(s,a) <-- (1 - alpha) * Q(s,a) + sample
             % can be rewritten as Q(s,a) <-- Q(s,a) + alpha * (sample - Q(s,a))
-            sample                    = reward; % replace nan with something appropriate.
-            pred                      = Q_vals(state_idx, action); % replace nan with something appropriate.
-            td_err                    = sample - pred; % don't change this.
-            Q_vals(state_idx, action) = Q_vals(state_idx, action) + alph * td_err; 
+            sample                    = reward;
+            pred                      = Q_vals(state_idx, action);
+            td_err                    = sample - pred;
+            Q_vals(state_idx, action) = Q_vals(state_idx, action) + alph * td_err;
 
             % -- DO NOT CHANGE ANYTHING BELOW UNLESS OTHERWISE NOTIFIED ---
             % -- (IMPLEMENT NON-TERMINAL Q-UPDATE FURTHER DOWN) -----------
@@ -226,7 +226,7 @@ for i = 1 : nbr_ep
             all_scores(i) = score;
             
             % Display stuff.
-            if ~test_agent
+            if ~test_agent && mod(i, 1000) == 0
                 disp(['GAME OVER! SCORE:       ', num2str(score)]);
                 disp(['AVERAGE SCORE SO FAR:   ', num2str(mean(all_scores(1 : i)))]);
                 if i >= 10
@@ -270,11 +270,10 @@ for i = 1 : nbr_ep
         % Q_vals(state_idx, action)
         % Hint: Q(s,a) <-- (1 - alpha) * Q(s,a) + sample
         % can be rewritten as Q(s,a) <-- Q(s,a) + alpha * (sample - Q(s,a))
-        sample                    = reward + gamm * max(Q_vals(next_state_idx, :));  % replace nan with something appropriate
-        pred                      = Q_vals(state_idx, action); % replace nan with something appropriate 
-        td_err                    = sample - pred; % don't change this!
-        Q_vals(state_idx, action) = Q_vals(state_idx, action) + alph * td_err; 
-        
+        sample                    = reward + gamm * max(Q_vals(next_state_idx, :));
+        pred                      = Q_vals(state_idx, action); 
+        td_err                    = sample - pred;
+        Q_vals(state_idx, action) = Q_vals(state_idx, action) + alph * td_err;
         % ------- DO NOT CHANGE ANYTHING BELOW ----------------------
     end
 end

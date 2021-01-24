@@ -95,24 +95,73 @@ for action = 1 : 3 % Evaluate all the different actions (left, forward, right).
     % you choose (3 are used below), and of course replace the randn() 
     % by something more sensible.
     state_action_feats(1, action) = distance_to_apple_decreased(grid, head_loc, next_head_loc);
-    state_action_feats(2, action) = check_for_obstacle(grid, next_head_loc);
-    state_action_feats(3, action) = found_apple(grid, next_head_loc);
-    %state_action_feats(3, action) = randn();
+    state_action_feats(2, action) = check_surroundings(grid, next_head_loc);
+    %state_action_feats(3, action) = found_apple(grid, next_head_loc);
+    %state_action_feats(3, action) = distance_to_COG_decreased(grid, head_loc, next_head_loc);
+    %state_action_feats(3, action) = check_trapped(grid, next_head_loc);
 end
 end
 
+function trapped = check_trapped(grid, next_head_loc)
+    occupied_neighbors = get_occupied_neighbors(grid, next_head_loc);
+    visited = occupied_neighbors;
+    while ((sum(ismember(next_head_loc, visited, 'rows')) == 0) & (size(occupied_neighbors) > 0))
+        new_neighbors = [];
+        for i = 1:size(occupied_neighbors,1)
+            new_neighbors = [new_neighbors; get_occupied_neighbors(grid, occupied_neighbors(i,:))];
+        end
+        visited = unique([visited; new_neighbors],'rows');
+        occupied_neighbors = new_neighbors(~ismember(new_neighbors, visited, 'rows'),:);
 
-function obstacle = check_for_obstacle(grid, next_head_loc) 
-   obstacle = -0.0001;
-   if grid(next_head_loc(1), next_head_loc(2)) == 1
-       obstacle = 5;
-   end
+    end
+    
+    snake_neighbors = [next_head_loc + [-1, 0]; next_head_loc + [1, 0]; next_head_loc + [0, -1]; next_head_loc + [0, 1]];
+    trapped = 0;
+    if sum(ismember(snake_neighbors, visited, 'rows')) >= 2
+        trapped = -1;
+    end
 end
 
-function reward = found_apple(grid, next_head_loc)
-    reward = -0.0001;
+function new_occupied_neighbors = get_occupied_neighbors(grid, loc)
+    neighbors = [loc + [-1, 0]; loc + [1, 0]; loc + [0, -1]; loc + [0, 1]];
+    new_occupied_neighbors = [];
+    for i = 1:size(neighbors)
+        if neighbors(i,1) > 0 && neighbors(i,2) > 0 && neighbors(i,1) < 31 && neighbors(i,2) < 31 && grid(neighbors(i,1), neighbors(i,2)) > 0
+            new_occupied_neighbors = [new_occupied_neighbors; neighbors(i,:)];
+        end
+    end
+end
+
+function delta = distance_to_COG_decreased(grid, head_loc, next_head_loc)
+    grid = grid(2:end-1,2:end-1);
+    binarisedmatrix = grid >= 1; %the thresholded matrix, a logical array
+    grid(binarisedmatrix) = 1;
+    [rows, cols] = ndgrid(1:size(grid, 1), 1:size(grid, 2));
+    cog_r = sum(rows(binarisedmatrix) .* grid(binarisedmatrix)) / sum(grid(binarisedmatrix));
+    cog_c = sum(cols(binarisedmatrix) .* grid(binarisedmatrix)) / sum(grid(binarisedmatrix));
+    d_current = sqrt((cog_r - head_loc(1))^2 + (cog_c - head_loc(2))^2); 
+    d_future = sqrt((cog_r - next_head_loc(1))^2 + (cog_c - next_head_loc(2))^2);
+    delta = 0.0;
+    if (d_current - d_future) > 0
+        delta = -0.5;
+    elseif (d_current - d_future) < 0
+        delta = 0.1;
+    end
+end
+
+function surrounding = check_surroundings(grid, next_head_loc) 
+    surrounding = -0.0;
+    if grid(next_head_loc(1), next_head_loc(2)) > 0
+       surrounding = -1;
+    elseif grid(next_head_loc(1), next_head_loc(2)) < 0
+       surrounding = 3;
+    end
+end
+
+function apple = found_apple(grid, next_head_loc) 
+    apple = 0;
     if grid(next_head_loc(1), next_head_loc(2)) == -1
-       reward = 0.1;
+       apple = 1;
     end
 end
 
@@ -120,7 +169,10 @@ function delta = distance_to_apple_decreased(grid, head_loc, next_head_loc)
     [apple_row, apple_col] = find(grid == -1);
     d_current = sqrt((apple_row - head_loc(1))^2 + (apple_col - head_loc(2))^2); 
     d_future = sqrt((apple_row - next_head_loc(1))^2 + (apple_col - next_head_loc(2))^2);
-    delta = (d_current - d_future) / 40;
+    delta = 0;
+    if (d_current - d_future) > 0
+        delta = 0.5;
+    end
 end
 
 %(norm(apple - prev_head_loc) - norm(apple - next_head_loc))/sqrt(2*(N-2)^2);

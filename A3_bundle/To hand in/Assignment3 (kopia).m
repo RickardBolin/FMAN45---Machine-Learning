@@ -72,8 +72,8 @@ recall = true_positives./sum_over_cols;
 
 
 %% 7
-%cifar10_starter()
-load('models/cifar10_modified.mat')
+cifar10_starter()
+%load('models/cifar10_new.mat')
 
 %%
 % All filters for the first convolutional layer

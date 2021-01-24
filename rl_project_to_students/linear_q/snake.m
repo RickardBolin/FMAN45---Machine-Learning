@@ -40,7 +40,7 @@ nbr_apples = 1;
 % ----- YOU MAY CHANGE SETTINGS BELOW UNLESS OTHERWISE NOTIFIED! ----------
 
 % Specify whether to test the agent or not (false --> train agent)
-test_agent = true; % set to true when you want to test your agent
+test_agent = false; % set to true when you want to test your agent
 
 % Set visualization settings (what you as programmer will see when the agent is playing)
 
@@ -48,15 +48,15 @@ test_agent = true; % set to true when you want to test your agent
 updates_per_sec = 20; % Allowed to be changed (though your code must handle at least 20 updates per sec)
 
 % Hint: Set to 0 when training / testing for long time
-show_fraction = 0.001; % Allowed to be changed. 1: show everything, 0: show nothing, 0.1: show every tenth, and so on...
+show_fraction = 0.01; % Allowed to be changed. 1: show everything, 0: show nothing, 0.1: show every tenth, and so on...
 
 % Stuff related to learning agent (YOU SHOULD EXPERIMENT A LOT WITH THESE
 % SETTINGS - SEE EXERCISE 8)
-nbr_feats = 3;                                             % Number of state-action features per action
-rewards   = struct('default', 0, 'apple', 1, 'death', -1); % Experiment with different reward signals, to see which yield a good behaviour for the agent
-gamm      = 0.999;                                          % Discount factor in Q-learning
-alph      = 0.05;                                           % Learning rate in Q-learning
-eps       = 0.03;                                           % Random action selection probability in epsilon-greedy Q-learning (lower: increase exploitation, higher: increase exploration)
+nbr_feats = 2;                                             % Number of state-action features per action
+rewards   = struct('default', 0, 'apple', 2, 'death', -5); % Experiment with different reward signals, to see which yield a good behaviour for the agent
+gamm      = 0.7;                                          % Discount factor in Q-learning
+alph      = 0.1;                                           % Learning rate in Q-learning
+eps       = 0.001;                                           % Random action selection probability in epsilon-greedy Q-learning (lower: increase exploitation, higher: increase exploration)
 
 % Optionally play around also with these settings
 alph_update_iter   = 0;   % 0: Never update alpha, Positive integer k: Update alpha every kth episode
@@ -66,7 +66,7 @@ eps_update_factor  = 0.5; % At eps update: new eps = old eps * eps_update_factor
 
 % Initial weights. REMEMBER: weights should be set as 1's and -1's in a
 % BAD WAY with respect to your chosen features (see Exercise 8) .
-init_weights = [0.1;0.1;0.1]%; 0.1; 0.1];
+init_weights = [5; 5]%; 0.1]%; 0.1; 0.1];
 
 % ------- DO NOT CHANGE ANYTHING BELOW UNLESS OTHERWISE NOTIFIED ---------
 % ------- (FAR DOWN YOU WILL IMPLEMENT Q WEIGHTS UPDATES, SO DO THAT) ----

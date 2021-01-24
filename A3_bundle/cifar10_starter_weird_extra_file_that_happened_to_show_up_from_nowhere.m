@@ -3,7 +3,7 @@ function cifar10_starter()
 
     % argument=2 is how many 10000 images that are loaded. 20000 in this
     % example. Load as much as your RAM can handle.
-    [x_train, y_train, x_test, y_test, classes] = load_cifar10(2);
+    [x_train, y_train, x_test, y_test, classes] = load_cifar10(5);
     
     % visualize the images?
     if false
@@ -39,22 +39,30 @@ function cifar10_starter()
     net.layers{end+1} = struct('type', 'input', ...
         'params', struct('size', [32, 32, 3]));
     
+    
     net.layers{end+1} = struct('type', 'convolution',...
-        'params', struct('weights', 0.1*randn(5,5,3,16)/sqrt(5*5*3/2), 'biases', zeros(16,1)),...
+        'params', struct('weights', 0.1*randn(5,5,3,8)/sqrt(5*5*8/2), 'biases', zeros(8,1)),...
         'padding', [2 2]);
     
     net.layers{end+1} = struct('type', 'relu');
-        
+    
     net.layers{end+1} = struct('type', 'maxpooling');
+        
+    net.layers{end+1} = struct('type', 'convolution',...
+        'params', struct('weights', 0.1*randn(5,5,8,16)/sqrt(5*5*8/2), 'biases', zeros(16,1)),...
+        'padding', [2 2]);
+
+    net.layers{end+1} = struct('type', 'relu');
+    
+    net.layers{end+1} = struct('type', 'maxpooling');
+
     
     net.layers{end+1} = struct('type', 'convolution',...
-        'params', struct('weights', 0.1*randn(5,5,16,16)/sqrt(5*5*16/2), 'biases', zeros(16,1)),...
-        'padding', [2 2]);
-    
-    net.layers{end+1} = struct('type', 'relu');
+        'params', struct('weights', 0.1*randn(3,3,16,32)/sqrt(3*3*16/2), 'biases', zeros(32,1)),...
+        'padding', [0 0]);
     
     net.layers{end+1} = struct('type', 'fully_connected',...
-        'params', struct('weights', randn(10,4096)/sqrt(4096/2), 'biases', zeros(10,1)));
+        'params', struct('weights', randn(10,1152)/sqrt(1152/2), 'biases', zeros(10,1)));
     
     net.layers{end+1} = struct('type', 'softmaxloss');
 
@@ -64,15 +72,15 @@ function cifar10_starter()
     training_opts = struct('learning_rate', 1e-3,...
         'iterations', 5000,...
         'batch_size', 16,...
-        'momentum', 0.95,...
-        'weight_decay', 0.001);
+        'momentum', 0.98,...
+        'weight_decay', 0.005);
     
     net = training(net, x_train, y_train, x_val, y_val, training_opts);
 
     % since the training takes a lot of time, consider refining rather than
     % retraining the net. Add layers to a net where the parameters already
     % are good at the other layers.
-    save('models/cifar10_baseline.mat', 'net');
+    save('A3_bundle/models/cifar10_new.mat', 'net');
     
     % evaluate on the test set
     pred = zeros(numel(y_test),1);

@@ -86,67 +86,60 @@ prev_head_loc = head_loc;
 % look at the function "get_next_info" (see bottom of this function).
 % You may find it useful.
 
-[i,j] = find(grid == -1);
-apple = [i,j];
-
 for action = 1 : 3 % Evaluate all the different actions (left, forward, right).
     
     % Feel free to uncomment below line of code if you find it useful.
     [next_head_loc, next_move_dir] = get_next_info(action, movement_dir, head_loc);
     
-    
-    
-    % Feature 1. Does the action bring us closer to the apple?
-    state_action_feats(3, action) = (norm(apple - prev_head_loc) - norm(apple - next_head_loc))/sqrt(2*(N-2)^2);
-    
-%     % Feature 2. Will the next action kill us?
-%     if(grid(next_head_loc(1),next_head_loc(2)) == 1)
-%         state_action_feats(2, action) = -1;
-%     else
-%         state_action_feats(2,action) = 0;
-%     end
-%     
-%     
-    
-    
-    
     % Replace this to fit the number of state-action features per features
     % you choose (3 are used below), and of course replace the randn() 
     % by something more sensible.
-    state_action_feats(1, action) = check_for_obstacle(grid, next_head_loc);
-    state_action_feats(2, action) = distance_to_apple_decreased(grid, head_loc, next_head_loc);
-    
-    %state_action_feats(3, action) = found_apple(grid, next_head_loc);
-    
-    
-    
-    %state_action_feats(3, action) = randn();
+    state_action_feats(1, action) = distance_to_apple_decreased(grid, head_loc, next_head_loc);
+    state_action_feats(2, action) = check_surroundings(grid, next_head_loc);
+    %state_action_feats(3, action) = distance_to_COG_decreased(grid, head_loc, next_head_loc);
+    % ... and so on ...
 end
 end
 
 
-function obstacle = check_for_obstacle(grid, next_head_loc) 
-   obstacle = 0;
-   if grid(next_head_loc) == 1
-       obstacle = -5;
-   end
-end
-
-function reward = found_apple(grid, next_head_loc)
+function reward = distance_to_apple_decreased(grid, head_loc, next_head_loc)
+    [apple_row, apple_col] = find(grid == -1);
+    d_current = sqrt((apple_row - head_loc(1))^2 + (apple_col - head_loc(2))^2); 
+    d_future = sqrt((apple_row - next_head_loc(1))^2 + (apple_col - next_head_loc(2))^2);
     reward = 0;
-    if grid(next_head_loc) == -1
-       reward = 2;
+    if (d_current - d_future) > 0
+        reward = 0.5;
     end
 end
 
-function delta = distance_to_apple_decreased(grid, prev_head_loc, next_head_loc)
-    [apple_row, apple_col] = find(grid == -1);
-    d_current = sqrt((apple_row - prev_head_loc(1))^2 + (apple_col - prev_head_loc(1))^2); 
-    d_future = sqrt((apple_row - next_head_loc(1))^2 + (apple_col - next_head_loc(1))^2);
-    delta = (d_current - d_future) / 40;
+
+function surrounding = check_surroundings(grid, next_head_loc) 
+    surrounding = 0;
+    if grid(next_head_loc(1), next_head_loc(2)) > 0
+       surrounding = -0.3;
+    elseif grid(next_head_loc(1), next_head_loc(2)) < 0
+       surrounding = 1;
+    end
 end
 
-%(norm(apple - prev_head_loc) - norm(apple - next_head_loc))/sqrt(2*(N-2)^2);
+function reward = distance_to_COG_decreased(grid, head_loc, next_head_loc)
+    grid = grid(2:end-1,2:end-1);
+    binarisedmatrix = grid >= 1; %the thresholded matrix, a logical array
+    grid(binarisedmatrix) = 1;
+    [rows, cols] = ndgrid(1:size(grid, 1), 1:size(grid, 2));
+    cog_r = sum(rows(binarisedmatrix) .* grid(binarisedmatrix)) / sum(grid(binarisedmatrix));
+    cog_c = sum(cols(binarisedmatrix) .* grid(binarisedmatrix)) / sum(grid(binarisedmatrix));
+    d_current = sqrt((cog_r - head_loc(1))^2 + (cog_c - head_loc(2))^2); 
+    d_future = sqrt((cog_r - next_head_loc(1))^2 + (cog_c - next_head_loc(2))^2);
+    reward = 0.0;
+    if (d_current - d_future) > 0
+        reward = -0.5;
+    elseif (d_current - d_future) < 0
+        reward = 0.1;
+    end
+end
+
+
 
 %
 % DO NOT CHANGE ANYTHING IN THE FUNCTION get_next_info BELOW!
